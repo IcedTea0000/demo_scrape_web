@@ -2,6 +2,7 @@ from bs4 import BeautifulSoup
 import requests
 from urllib.parse import urlparse
 import re
+import csv
 
 
 def generate_header():
@@ -19,19 +20,33 @@ def generate_header():
 def get_soup(absolute_path):
     """return beautiful soup object from input url"""
     try:
+        # send get request to url with headers
         response = requests.get(url=absolute_path, headers=generate_header())
         if response.status_code != 200:
             return None
         soup = BeautifulSoup(response.text, 'html.parser')
     except:
-        print('[Error] error sending request')
+        print('[Error] Error sending request')
         return None
     return soup
 
 
 def convert_absolute_url(target_url):
+    """convert target url and get domain only"""
     parse = urlparse(url=target_url)
     return parse.scheme + '://' + parse.netloc
+
+
+def write_to_csv(file_name, local_path, contents):
+    """append contents to local file"""
+    csv_file = open(local_path + '\\' + file_name, 'a', newline='')
+    csv_writer = csv.writer(csv_file, delimiter=',')
+    for link in contents:
+        temp_list = list()
+        temp_list.append(link)
+        csv_writer.writerow(temp_list)
+    print('[Logger] File export successfully to {}'.format(local_path))
+    csv_file.close()
 
 
 def get_link(soup, target_url):
@@ -40,10 +55,13 @@ def get_link(soup, target_url):
     domain = convert_absolute_url(target_url)
 
     if soup is not None:
+        # get body of page source
         body = soup.find(name='body')
-        a_hrefs = body.find_all(name='a', attrs={'href': re.compile('^\/wiki' #starts with '/wiki'
-                                                                    '.*' # follow by any number of characters
+        # get all <a> contains href with internal link
+        a_hrefs = body.find_all(name='a', attrs={'href': re.compile('^\/wiki'  # starts with '/wiki'
+                                                                    '.*'  # follow by any number of characters
                                                                     )})
+        # get href part in <a> and convert to full url
         for link in a_hrefs:
             href = link.attrs['href']
             links.add(domain + href)
@@ -54,5 +72,5 @@ def get_link(soup, target_url):
 if __name__ == '__main__':
     # execute script only
     target_url = 'https://en.wikipedia.org/wiki/Data'
-    links = get_link(get_soup(target_url), target_url)
-    print(*links, sep='\n')
+    link_list = get_link(get_soup(target_url), target_url)
+    write_to_csv(file_name='wiki.csv', local_path='..\..\io', contents=link_list)
