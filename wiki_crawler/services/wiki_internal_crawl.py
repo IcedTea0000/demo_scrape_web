@@ -3,6 +3,7 @@ import requests
 from urllib.parse import urlparse
 import re
 import csv
+from wiki_crawler.entities.objects import Link
 
 
 def generate_header():
@@ -41,10 +42,9 @@ def write_to_csv(file_name, local_path, contents):
     """append contents to local file"""
     csv_file = open(local_path + '\\' + file_name, 'a', newline='')
     csv_writer = csv.writer(csv_file, delimiter=',')
+    csv_writer.writerow(['Title', 'Url'])
     for link in contents:
-        temp_list = list()
-        temp_list.append(link)
-        csv_writer.writerow(temp_list)
+        csv_writer.writerow([link.title,link.url])
     print('[Logger] File export successfully to {}'.format(local_path))
     csv_file.close()
 
@@ -58,13 +58,18 @@ def get_link(soup, target_url):
         # get body of page source
         body = soup.find(name='body')
         # get all <a> contains href with internal link
-        a_hrefs = body.find_all(name='a', attrs={'href': re.compile('^\/wiki'  # starts with '/wiki'
-                                                                    '.*'  # follow by any number of characters
-                                                                    )})
+        a_tags = body.find_all(name='a', attrs={'href': re.compile('^\/wiki'  # starts with '/wiki'
+                                                                   '.*'  # follow by any number of characters
+                                                                   )})
         # get href part in <a> and convert to full url
-        for link in a_hrefs:
-            href = link.attrs['href']
-            links.add(domain + href)
+        for a_tag in a_tags:
+            href = a_tag.attrs['href']
+            try:
+                title = a_tag.attrs['title']
+            except:
+                title = ''
+            link = Link(url=domain + href, title=title)
+            links.add(link)
 
     return links
 
