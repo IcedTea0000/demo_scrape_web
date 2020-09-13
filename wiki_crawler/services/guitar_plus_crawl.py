@@ -1,6 +1,6 @@
 from bs4 import BeautifulSoup
 import requests
-from urllib.parse import urlparse
+from urllib.parse import urlparse, urljoin
 import re
 import csv
 
@@ -34,12 +34,6 @@ class GuitarPlusCrawler:
             print('[Error] Error sending request to {}'.format(target_url))
         return None
 
-    def convert_relative_path(self, current_url, path):
-        """convert web page relative path to absolute path"""
-        if path.startswith('/'):
-            return self.get_domain(current_url) + path
-        return path
-
     def get_domain(self, url):
         """extract domain from url"""
         parse = urlparse(url=url)
@@ -70,14 +64,16 @@ class GuitarPlusCrawler:
                                 '|'  # or
                                 '(^/.*)',  # start with '/'
                                 re.IGNORECASE | re.VERBOSE)
-
-        for a_tag in self.get_hrefs_by_regex(soup=soup, regex=href_regex):
-            link = a_tag.attrs['href']
-            link = self.convert_relative_path(current_url=target_url, path=link)
-            if link not in self.internal_link_set:
-                self.internal_link_set.add(link)
-                print(link)
-                self.get_internal_links(link)
+        a_tags = self.get_hrefs_by_regex(soup=soup, regex=href_regex)
+        if a_tags:
+            for a_tag in a_tags:
+                if a_tag.attrs['href']:
+                    link = urljoin(target_url, a_tag.attrs['href'])
+                    if link not in self.internal_link_set:
+                        self.internal_link_set.add(link)
+                        print(link)
+                        self.get_internal_links(link)
+        return
 
     def get_external_links(self, target_url):
         """recursion to traverse all external link from starter url"""
