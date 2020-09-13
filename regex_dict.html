@@ -1,0 +1,9 @@
+1. Internal links & relative paths only
+(^https://guitarplus.com.*)'   <!--starts with 'https://guitarplus.com' -->
+'|'  <!--  or -->
+'(^/.*)'  <!-- start with '/' -->
+
+2. External link only
+(^https|http|www) <!-- starts with https|http|www -->
+((?!guitarplus.com) <!-- does not follow with 'guitarplus.com' -->
+.)*$ <!-- following by any characters -->
