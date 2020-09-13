@@ -6,6 +6,9 @@ import csv
 
 
 class GuitarPlusCrawler:
+    def __init__(self):
+        self.link_set = set()
+
     def generate_headers(self):
         """return human headers"""
         headers = {
@@ -29,8 +32,6 @@ class GuitarPlusCrawler:
         except requests.RequestException:
             print('[Error] Error sending request to {}'.format(target_url))
         return None
-
-    link_set = set()
 
     def get_links(self, target_url):
         """recursion to traverse all internal link from starter url"""

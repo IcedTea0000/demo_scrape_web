@@ -1,3 +1,7 @@
+.idea/demo_scrape_web.iml
+.idea/misc.xml
+
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
