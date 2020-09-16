@@ -4,6 +4,8 @@ from urllib.parse import urlparse, urljoin
 import re
 import csv
 import sys
+import os
+import mysql.connector
 
 
 class BookToScrapeCrawler:
@@ -74,13 +76,47 @@ class BookToScrapeCrawler:
     def collect_external_links(self):
         return
 
+    def export_csv(self, file_name, local_path):
+        """write internal links set to csv file"""
+        # Open a file for writing. Creates a new file if it does not exist or truncates the file if it exists
+        csv_file = open(os.path.join(local_path, file_name), 'w', newline='')
+        csv_writer = csv.writer(csv_file, delimiter=',')
+        csv_writer.writerow(['Url'])
+        for link in self.internal_links:
+            csv_writer.writerow([link])
+        print('[Logger] File export successfully to {}'.format(local_path))
+        csv_file.close()
+
+    def get_connection(self, host, username, password):
+        """return a connection to mysql database"""
+        return mysql.connector.connect(host=host, user=username, password=password)
+
+    def insert_to_db(self):
+        """insert internal links set to db"""
+        connection = self.get_connection('127.0.0.1', 'root', 'root')
+        mycursor = connection.cursor()
+        for link in self.internal_links:
+            mycursor.execute("""INSERT INTO crawler_import.book_to_scrape
+                            (`url`)
+                            VALUES
+                            ('""" + link + """');
+                            """)
+            connection.commit()
+        mycursor.close()
+        print('[Logger] Finish writing internal links set to database')
+
 
 if __name__ == '__main__':
     # execute script only
     # set new recursion limit
-    sys.setrecursionlimit(10**5)
+    sys.setrecursionlimit(10 ** 2)
 
     crawler = BookToScrapeCrawler()
     url = 'http://books.toscrape.com'
-    crawler.collect_internal_links(starting_url=url)
+    try:
+        crawler.collect_internal_links(starting_url=url)
+    except RecursionError:
+        pass
     # print(*crawler.internal_links, sep='\n')
+    crawler.export_csv(file_name='temp_html_scrape.html', local_path='C:/remy_temp/')
+    crawler.insert_to_db()
