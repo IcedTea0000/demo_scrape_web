@@ -114,18 +114,22 @@ class BookToScrapeCrawlerSelenium:
 
     def get_browser(self):
         """return selenium chrome driver"""
-        local_path = 'C:\workspace\drivers\chromedriver85.exe'
+        local_path = 'C:\Remy Martin\workspace\WebScrapeCrawlProjects\drivers\chromedriver85.exe'
         return webdriver.Chrome(executable_path=local_path)
 
     def test(self):
         browser = self.get_browser()
-        browser.get(url='http://www.python.org')
-        element = browser.find_element_by_name('q')
-        element.clear()
-        element.send_keys('test')
-        element.send_keys(Keys.ENTER)
-        print('done')
+        browser.get(url='http://books.toscrape.com/')
+        # element = browser.find_element_by_name('q')
+        # element.clear()
+        # element.send_keys('test')
+        # element.send_keys(Keys.ENTER)
 
+        body = browser.find_element_by_tag_name('body')
+
+        next_btn = browser.find_element_by_xpath(xpath='//*[@id="default"]/div/div/div/div/section/div[2]/div/ul/li[2]/a')
+        next_btn.click()
+        print('test')
 
 if __name__ == '__main__':
     # execute script only

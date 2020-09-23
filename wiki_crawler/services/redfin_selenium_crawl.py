@@ -34,8 +34,6 @@ class RedfinCrawler:
         browser.close()
         return html
 
-
-
     def temp(self, html):
         """extract price from all option tag for filter"""
         price_list = []
@@ -52,4 +50,4 @@ if __name__ == '__main__':
     # execute script only
     url = 'https://www.redfin.com/city/4001/TX/Cleveland'
     crawler = RedfinCrawler()
-    print(crawler.get_target_url(min_price='50k',max_price='75k'))
+    print(crawler.get_target_url(min_price='50k', max_price='75k'))
