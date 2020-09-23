@@ -6,6 +6,8 @@ import csv
 import sys
 import os
 import mysql.connector
+from selenium import webdriver
+from selenium.webdriver.common.keys import Keys
 
 
 class BookToScrapeCrawler:
@@ -106,17 +108,40 @@ class BookToScrapeCrawler:
         print('[Logger] Finish writing internal links set to database')
 
 
+class BookToScrapeCrawlerSelenium:
+    def __init__(self):
+        pass
+
+    def get_browser(self):
+        """return selenium chrome driver"""
+        local_path = 'C:\workspace\drivers\chromedriver85.exe'
+        return webdriver.Chrome(executable_path=local_path)
+
+    def test(self):
+        browser = self.get_browser()
+        browser.get(url='http://www.python.org')
+        element = browser.find_element_by_name('q')
+        element.clear()
+        element.send_keys('test')
+        element.send_keys(Keys.ENTER)
+        print('done')
+
+
 if __name__ == '__main__':
     # execute script only
     # set new recursion limit
     sys.setrecursionlimit(10 ** 2)
 
-    crawler = BookToScrapeCrawler()
     url = 'http://books.toscrape.com'
-    try:
-        crawler.collect_internal_links(starting_url=url)
-    except RecursionError:
-        pass
-    # print(*crawler.internal_links, sep='\n')
-    crawler.export_csv(file_name='temp_html_scrape.html', local_path='C:/remy_temp/')
-    crawler.insert_to_db()
+
+    # crawler = BookToScrapeCrawler()
+    # try:
+    #     crawler.collect_internal_links(starting_url=url)
+    # except RecursionError:
+    #     pass
+    # # print(*crawler.internal_links, sep='\n')
+    # crawler.export_csv(file_name='temp_html_scrape.html', local_path='C:/remy_temp/')
+    # crawler.insert_to_db()
+
+    crawler = BookToScrapeCrawlerSelenium()
+    crawler.test()
